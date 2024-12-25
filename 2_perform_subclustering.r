@@ -89,15 +89,19 @@ recluster <- function(seuratobj,
   seuratobj
 }
 
-## do the reclustering  at resolutions 0.1, 0.2, 0.3, 0.4, 0.5 and 1
-apcs <- apcs %>% recluster(dims = dims)
-lymphocyte <- lymphocyte %>% recluster(dims = dims)
+## do the reclustering  at resolutions 0.1, 0.2, 0.3, 0.4, 0.5 to 1
+apcs <- apcs %>% recluster(dims = dims, resolution = seq(0.1, 1, by=0.1))
+lymphocyte <- lymphocyte %>% recluster(dims = dims, resolution = seq(0.1, 1, by=0.1))
 
 apcs$SCT_snn_res.0.1 <- as.character(apcs$SCT_snn_res.0.1)
 apcs$SCT_snn_res.0.2 <- as.character(apcs$SCT_snn_res.0.2)
 apcs$SCT_snn_res.0.3 <- as.character(apcs$SCT_snn_res.0.3)
 apcs$SCT_snn_res.0.4 <- as.character(apcs$SCT_snn_res.0.4)
 apcs$SCT_snn_res.0.5 <- as.character(apcs$SCT_snn_res.0.5)
+apcs$SCT_snn_res.0.6 <- as.character(apcs$SCT_snn_res.0.6)
+apcs$SCT_snn_res.0.7 <- as.character(apcs$SCT_snn_res.0.7)
+apcs$SCT_snn_res.0.8 <- as.character(apcs$SCT_snn_res.0.8)
+apcs$SCT_snn_res.0.9 <- as.character(apcs$SCT_snn_res.0.9)
 apcs$SCT_snn_res.1 <- as.character(apcs$SCT_snn_res.1)
 
 lymphocyte$SCT_snn_res.0.1 <- as.character(lymphocyte$SCT_snn_res.0.1)
@@ -105,6 +109,10 @@ lymphocyte$SCT_snn_res.0.2 <- as.character(lymphocyte$SCT_snn_res.0.2)
 lymphocyte$SCT_snn_res.0.3 <- as.character(lymphocyte$SCT_snn_res.0.3)
 lymphocyte$SCT_snn_res.0.4 <- as.character(lymphocyte$SCT_snn_res.0.4)
 lymphocyte$SCT_snn_res.0.5 <- as.character(lymphocyte$SCT_snn_res.0.5)
+lymphocyte$SCT_snn_res.0.6 <- as.character(lymphocyte$SCT_snn_res.0.6)
+lymphocyte$SCT_snn_res.0.7 <- as.character(lymphocyte$SCT_snn_res.0.7)
+lymphocyte$SCT_snn_res.0.8 <- as.character(lymphocyte$SCT_snn_res.0.8)
+lymphocyte$SCT_snn_res.0.9 <- as.character(lymphocyte$SCT_snn_res.0.9)
 lymphocyte$SCT_snn_res.1 <- as.character(lymphocyte$SCT_snn_res.1)
 
 
@@ -114,6 +122,10 @@ apcs$SCT_snn_res.0.2 <- paste0("A",apcs$SCT_snn_res.0.2)
 apcs$SCT_snn_res.0.3 <- paste0("A",apcs$SCT_snn_res.0.3)
 apcs$SCT_snn_res.0.4 <- paste0("A",apcs$SCT_snn_res.0.4)
 apcs$SCT_snn_res.0.5 <- paste0("A",apcs$SCT_snn_res.0.5)
+apcs$SCT_snn_res.0.6 <- paste0("A",apcs$SCT_snn_res.0.6)
+apcs$SCT_snn_res.0.7 <- paste0("A",apcs$SCT_snn_res.0.7)
+apcs$SCT_snn_res.0.8 <- paste0("A",apcs$SCT_snn_res.0.8)
+apcs$SCT_snn_res.0.9 <- paste0("A",apcs$SCT_snn_res.0.9)
 apcs$SCT_snn_res.1 <- paste0("A",apcs$SCT_snn_res.1)
 
 lymphocyte$SCT_snn_res.0.1 <- paste0("L",lymphocyte$SCT_snn_res.0.1)
@@ -121,6 +133,10 @@ lymphocyte$SCT_snn_res.0.2 <- paste0("L",lymphocyte$SCT_snn_res.0.2)
 lymphocyte$SCT_snn_res.0.3 <- paste0("L",lymphocyte$SCT_snn_res.0.3)
 lymphocyte$SCT_snn_res.0.4 <- paste0("L",lymphocyte$SCT_snn_res.0.4)
 lymphocyte$SCT_snn_res.0.5 <- paste0("L",lymphocyte$SCT_snn_res.0.5)
+lymphocyte$SCT_snn_res.0.6 <- paste0("L",lymphocyte$SCT_snn_res.0.6)
+lymphocyte$SCT_snn_res.0.7 <- paste0("L",lymphocyte$SCT_snn_res.0.7)
+lymphocyte$SCT_snn_res.0.8 <- paste0("L",lymphocyte$SCT_snn_res.0.8)
+lymphocyte$SCT_snn_res.0.9 <- paste0("L",lymphocyte$SCT_snn_res.0.9)
 lymphocyte$SCT_snn_res.1 <- paste0("L",lymphocyte$SCT_snn_res.1)
 
 ## get the mast cells barcodes
@@ -144,11 +160,6 @@ subcluster <- subset(merged_samples, subset = supercluster %in% c("APC","Lymphoc
 subcluster <- SCTransform(subcluster, verbose=FALSE, method="glmGamPoi")
 subcluster <- RunPCA(subcluster)
 
-## run the scaledata, PCA for the combined subcluster.
-subcluster <- subcluster %>% 
-  ScaleData() %>% 
-  RunPCA() 
-
 subcluster %>% ElbowPlot(ndims = 50)
 
 ### Run harmony for the combined subcluster.
@@ -158,9 +169,9 @@ subcluster <- subcluster %>% RunHarmony(group.by.vars = batch,
 
 ElbowPlot(subcluster, ndims = max_harmony_dims, reduction = 'harmony')
 
-### recluster at resolutions 0.1, 0.2, 0.3, 0.4, 0.5 and 1
-subcluster <- subcluster %>% recluster(dims = dims)
-
+### recluster at resolutions 0.1, 0.2, 0.3, 0.4, 0.5 to 1
+subcluster <- subcluster %>% recluster(dims = dims, resolution = seq(0.1, 1, by=0.1))
+clustree(subcluster)
 
 ### add the annotation to the main "subcluster" object
 global_0.1 <- subcluster$SCT_snn_res.0.1
@@ -168,6 +179,10 @@ global_0.2 <- subcluster$SCT_snn_res.0.2
 global_0.3 <- subcluster$SCT_snn_res.0.3
 global_0.4 <- subcluster$SCT_snn_res.0.4
 global_0.5 <- subcluster$SCT_snn_res.0.5
+global_0.6 <- subcluster$SCT_snn_res.0.6
+global_0.7 <- subcluster$SCT_snn_res.0.7
+global_0.8 <- subcluster$SCT_snn_res.0.8
+global_0.9 <- subcluster$SCT_snn_res.0.9
 global_1 <- subcluster$SCT_snn_res.1
 
 mast_annotation <- merged_samples$supercluster[merged_samples$supercluster == "Mast"]
@@ -193,12 +208,32 @@ local_0.5_apcs <- apcs$SCT_snn_res.0.5
 local_0.5_lymphocyte <- lymphocyte$SCT_snn_res.0.5
 local_0.5 <- c(local_0.5_apcs, local_0.5_lymphocyte, mast_annotation)
 
+local_0.6_apcs <- apcs$SCT_snn_res.0.6
+local_0.6_lymphocyte <- lymphocyte$SCT_snn_res.0.6
+local_0.6 <- c(local_0.6_apcs, local_0.6_lymphocyte, mast_annotation)
+
+local_0.7_apcs <- apcs$SCT_snn_res.0.7
+local_0.7_lymphocyte <- lymphocyte$SCT_snn_res.0.7
+local_0.7 <- c(local_0.7_apcs, local_0.7_lymphocyte, mast_annotation)
+
+local_0.8_apcs <- apcs$SCT_snn_res.0.8
+local_0.8_lymphocyte <- lymphocyte$SCT_snn_res.0.8
+local_0.8 <- c(local_0.8_apcs, local_0.8_lymphocyte, mast_annotation)
+
+local_0.9_apcs <- apcs$SCT_snn_res.0.9
+local_0.9_lymphocyte <- lymphocyte$SCT_snn_res.0.9
+local_0.9 <- c(local_0.9_apcs, local_0.9_lymphocyte, mast_annotation)
+
 local_1_apcs <- apcs$SCT_snn_res.1
 local_1_lymphocyte <- lymphocyte$SCT_snn_res.1
 local_1 <- c(local_1_apcs, local_1_lymphocyte, mast_annotation)
 
 
 # add the metadata
+subcluster <- AddMetaData(subcluster, metadata = global_0.9, col.name="Global_0.9")
+subcluster <- AddMetaData(subcluster, metadata = global_0.8, col.name="Global_0.8")
+subcluster <- AddMetaData(subcluster, metadata = global_0.7, col.name="Global_0.7")
+subcluster <- AddMetaData(subcluster, metadata = global_0.6, col.name="Global_0.6")
 subcluster <- AddMetaData(subcluster, metadata = global_0.5, col.name="Global_0.5")
 subcluster <- AddMetaData(subcluster, metadata = global_0.4, col.name="Global_0.4")
 subcluster <- AddMetaData(subcluster, metadata = global_0.3, col.name="Global_0.3")
@@ -206,6 +241,10 @@ subcluster <- AddMetaData(subcluster, metadata = global_0.2, col.name="Global_0.
 subcluster <- AddMetaData(subcluster, metadata = global_0.1, col.name="Global_0.1")
 subcluster <- AddMetaData(subcluster, metadata = global_1, col.name="Global_1")
 
+subcluster <- AddMetaData(subcluster, metadata = local_0.9, col.name="Local_0.9")
+subcluster <- AddMetaData(subcluster, metadata = local_0.8, col.name="Local_0.8")
+subcluster <- AddMetaData(subcluster, metadata = local_0.7, col.name="Local_0.7")
+subcluster <- AddMetaData(subcluster, metadata = local_0.6, col.name="Local_0.6")
 subcluster <- AddMetaData(subcluster, metadata = local_0.5, col.name="Local_0.5")
 subcluster <- AddMetaData(subcluster, metadata = local_0.4, col.name="Local_0.4")
 subcluster <- AddMetaData(subcluster, metadata = local_0.3, col.name="Local_0.3")
@@ -226,7 +265,8 @@ DimPlot(subcluster, group.by="cluster", label=TRUE, raster=FALSE)+NoLegend()
 dev.off()
 
 ## UMAPs for each custom resolution
-clusters_labels <- c("Local_0.1","Local_0.2","Local_0.3","Local_0.4","Local_0.5","Local_1","Global_0.1","Global_0.2","Global_0.3","Global_0.4","Global_0.5","Global_1")
+clusters_labels <- c("Local_0.1","Local_0.2","Local_0.3","Local_0.4","Local_0.5","Local_0.6","Local_0.7","Local_0.8","Local_0.9","Local_1",
+  "Global_0.1","Global_0.2","Global_0.3","Global_0.4","Global_0.5","Global_0.6","Global_0.7","Global_0.8","Global_0.9","Global_1")
 
 for(cl in clusters_labels){
   png(paste0("/special_projects/55_scalp_psoriasis_analysis_jeff/analysis_local_and_global_sct/UMAP_",cl,".png"), width=10, height=10, units="in", res=300)
@@ -279,7 +319,7 @@ for(cl in clusters_labels){
 ## local
 OUT <- createWorkbook()
 
-for(cl in clusters_labels[1:6]){
+for(cl in clusters_labels[1:10]){
   gc()
   Idents(subcluster) <- cl
   print(cl)
@@ -294,7 +334,7 @@ saveWorkbook(OUT, paste0("/special_projects/55_scalp_psoriasis_analysis_jeff/ana
 ## global
 OUT <- createWorkbook()
 
-for(cl in clusters_labels[7:12]){
+for(cl in clusters_labels[11:20]){
   gc()
   Idents(subcluster) <- cl
   print(cl)
@@ -308,10 +348,9 @@ saveWorkbook(OUT, paste0("/special_projects/55_scalp_psoriasis_analysis_jeff/ana
 
 
 
-
 # Count of cells per sample - local clusterign
 OUT <- createWorkbook()
-resolutions <- clusters_labels[1:6]
+resolutions <- clusters_labels[1:10]
 
 for(resolution in resolutions){
   print(resolution)
@@ -337,7 +376,7 @@ saveWorkbook(OUT, paste0("/special_projects/55_scalp_psoriasis_analysis_jeff/ana
 
 # Count of cells per sample - global clusterign
 OUT <- createWorkbook()
-resolutions <- clusters_labels[7:12]
+resolutions <- clusters_labels[11:20]
 
 for(resolution in resolutions){
   print(resolution)

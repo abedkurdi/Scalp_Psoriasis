@@ -22,6 +22,7 @@ library(tools)
 library("writexl")
 library(openxlsx)
 library(harmony)
+library(clustree)
 
 # load in the data
 merged_samples <- readRDS("/special_projects/55_scalp_psoriasis_analysis_jeff/RData/merged_all_samples_integrated_sct.RDS")
